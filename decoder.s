@@ -3,7 +3,7 @@ output: .asciz "%c"
 output2: .asciz "%ld"
 .text
 
-.include "helloWorld.s"
+.include "final.s"
 
 .global main
 
@@ -24,8 +24,20 @@ decode:
 	movq	%rsp, %rbp		# copy stack pointer value to base pointer
 
   push %rdi
-  call compar
-
+ # call compar
+  pop %r9
+  mov $0, %r11
+  mov (%r9), %r11b
+  inc %r9
+  mov $0, %r8
+  mov (%r9), %r8b
+  inc  %r9
+  mov $0, %r12
+  mov (%r9), %r12b
+  push %r12
+  push %r11
+  push %r8
+  jmp printer
 	# epilogue
 	movq	%rbp, %rsp		# clear local variables from stack
 	popq	%rbp			# restore base pointer location 
@@ -71,7 +83,7 @@ compar:
   inc %r9
   mov $0, %r8
   mov (%r9), %r8b
-  inc %r9
+  inc  %r9
   mov $0, %r12
   mov (%r9), %r12b
   push %r12

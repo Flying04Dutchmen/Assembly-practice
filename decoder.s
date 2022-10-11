@@ -1,5 +1,6 @@
 .data
 output: .asciz "%c"
+output2: .asciz "%ld"
 .text
 
 .include "helloWorld.s"
@@ -22,21 +23,8 @@ decode:
 	pushq	%rbp 			# push the base pointer (and align the stack)
 	movq	%rsp, %rbp		# copy stack pointer value to base pointer
 
-  mov %rdi, %r8
-  mov %rdi, %r9
-  mov %rdi, %r10
-  add $1, %r9
-  add $2, %r8
-  mov (%r8), %r8b
-  mov (%r9), %r9b
-  mov %r9b, %cl
-  movb (%r10), %r10b
-  mov $0, %rsi
-  mov %r10b, %sil
-  call printer
+  push %rdi
   call compar
-  call decode
-  
 
 	# epilogue
 	movq	%rbp, %rsp		# clear local variables from stack
@@ -57,35 +45,55 @@ main:
 
 printer:
  
-  pushq %rbp      # push the base pointer (and align the stack)
-  movq  %rsp, %rbp    # copy stack pointer value to base pointer
+  pop %rcx
+  cmpq $1, %rcx
+  jl compar2
+  dec %rcx
+  
+  pop %r9
+  mov %r9, %rsi
+  push %r9
+  push %rcx
+  
 
   mov $output, %rdi
   mov $0, %rax
   call printf
-  dec %cl 
-  cmp $0, %cl
-  jg printer
-  movq  %rbp, %rsp    # clear local variables from stack
-  popq  %rbp      # restore base pointer location 
-
-compar:
-  pushq %rbp      # push the base pointer (and align the stack)
-  movq  %rsp, %rbp    # copy stack pointer value to base pointer
-
-  cmp $0, %r8b
-  je end1
-  mov $0, %rax
-  mov %r8b, %al
-  mov $8, %r15
-  mul %r15
-  mov $MESSAGE, %rdi
-  add %rax, %rdi
+  jmp printer
   
+  
+compar:
+  
+ 
+  pop %r9
+  mov $0, %r11
+  mov (%r9), %r11b
+  inc %r9
+  mov $0, %r8
+  mov (%r9), %r8b
+  inc %r9
+  mov $0, %r12
+  mov (%r9), %r12b
+  push %r12
+  push %r11
+  push %r8
+  jmp printer
+  
+compar2:
+  pop %r15
+  
+  pop %r8
+  
+  cmp $0, %r8
+  je end1
+  mov $8, %rax
+  mul %r8
+  mov $MESSAGE, %r9
+  add %rax, %r9
+  push %r9
+  jmp compar
 
+end1:
   movq  %rbp, %rsp    # clear local variables from stack
   popq  %rbp      # restore base pointer location 
   ret
-end1:
-
-    ret

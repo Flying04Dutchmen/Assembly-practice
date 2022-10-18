@@ -3,6 +3,7 @@ output: .asciz "%c"
 output2: .asciz "%ld"
 foreground: .asciz "\x1B[38;5;%ldm"
 background: .asciz "\x1B[48;5;%ldm"
+effecter: .asciz "\x1B[%ldm"
 .text
 
 .include "final.s"
@@ -136,6 +137,20 @@ call printf
 jmp printer
 
 effects:
+cmp $0, %r8
+je stop
+cmp $34, %r8
+je stopblink
+cmp $42, %r8
+je bold
+cmp $66, %r8
+je faint
+cmp $105, %r8
+je conceal
+cmp $153, %r8
+je reveal
+cmp $182, %r8
+je blink
 jmp printer
 
 compar2:
@@ -153,6 +168,56 @@ compar2:
   add %rax, %r9     #calculate next memory adress
   push %r9
   jmp compar      #restart routine for printing next character
+
+stop:
+  mov $effecter, %rdi
+  mov $0, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+stopblink:
+  mov $effecter, %rdi
+  mov $25, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+bold:
+  mov $effecter, %rdi
+  mov $1, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+faint:
+  mov $effecter, %rdi
+  mov $2, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+conceal:
+  mov $effecter, %rdi
+  mov $8, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+reveal:
+  mov $effecter, %rdi
+  mov $28, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
+blink:
+  mov $effecter, %rdi
+  mov $5, %rsi
+  mov $0, %rax
+  call printf
+  jmp printer
+
 
 end1:
   pop %r9

@@ -1,4 +1,3 @@
-
 .data
 commainput: .quad  0
 storage: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -123,13 +122,10 @@ mov $0, %rax
 call scanf
 mov $0, %r8
 mov commainput, %r8
-#pop %rsi
-#pop %rsi
-#`mov %rsi, %rdi
-mov %r8, %rdi
-#movq $0, %rdi
-#cmp $0, %r8
-#jg incrementer
+pop %rsi
+pop %rdi
+cmp $0, %r8
+jg incrementer
 
 jmp crazyfast
 
@@ -137,9 +133,8 @@ jmp crazyfast
 incrementer:
 cmp $0, %r8
 je crazyfast
-#add $1, (%rcx)
+add $1, (%rcx)
 dec %r8
 jmp incrementer
-
 
 

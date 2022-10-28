@@ -124,6 +124,7 @@ mov $0, %r8
 mov commainput, %r8
 pop %rsi
 pop %rdi
+movb $0, (%rcx)
 cmp $0, %r8
 jg incrementer
 

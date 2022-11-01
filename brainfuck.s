@@ -4,7 +4,7 @@ output: .asciz "%c"
 input: .asciz "%c"
 ending: .asciz "\n"
 
-storage: .fill 400000000
+storage: .fill 60000
 
 .global brainfuck
 
@@ -97,6 +97,10 @@ pop %rdi
 jmp crazyfast
 
 startsub:
+mov $0, %rsi
+mov (%rcx), %sil
+cmp $0, %rsi
+je skipper
 push %rdi
 mov $0, %rax
 push %rax
@@ -124,6 +128,14 @@ pop %rcx
 pop %rdi
 
 jmp crazyfast
+
+skipper:
+inc %rdi
+movq $0, %rsi
+movb (%rdi), %sil
+cmp $93, %rsi
+je crazyfast
+jmp skipper
 
 end:
 mov $ending, %rdi

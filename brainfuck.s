@@ -1,9 +1,11 @@
 .data
 commainput: .quad  0
-storage: .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 output: .asciz "%c"
-input: .asciz "%ld"
+input: .asciz "%c"
 ending: .asciz "\n"
+
+storage: .fill 400000000
+
 .global brainfuck
 
 format_str: .asciz "We should be executing the following code:\n%s"
@@ -22,9 +24,7 @@ brainfuck:
   call printf
 
   pop %rdi
- # dec %rdi
   mov $storage, %rcx
- # jmp crazyfast
   mov $0, %rsi
   mov (%rdi), %sil
   jmp divider
@@ -35,8 +35,8 @@ brainfuck:
 
 crazyfast:
 inc %rdi
-mov $0, %rsi
-mov (%rdi), %sil
+movq $0, %rsi
+movb (%rdi), %sil
 jmp divider
 
 divider:
@@ -64,20 +64,17 @@ je startsub
 cmpb $93, %sil
 je stopsub
 
-mov $ending, %rdi
-mov $0, %rax
-call printf
+cmpb $0, %sil
+je end
 
-movq %rbp, %rsp
-popq %rbp
-ret
+jmp crazyfast
 
 plus:
-add $1, (%rcx)
+addb $1, (%rcx)
 jmp crazyfast
 
 minus:
-sub $1, (%rcx)
+subb $1, (%rcx)
 jmp crazyfast
 
 cellback:
@@ -101,11 +98,14 @@ jmp crazyfast
 
 startsub:
 push %rdi
+mov $0, %rax
+push %rax
 jmp crazyfast
 
 stopsub:
 mov $0, %rsi
 mov (%rcx), %sil
+pop %rax
 pop %r8
 cmp $0, %rsi
 je crazyfast
@@ -115,27 +115,22 @@ jmp crazyfast
 
 comma:
 push %rdi
-push %rsi
 mov $input, %rdi
-mov $commainput, %rsi
-mov $0, %rax
+mov %rcx, %rsi
+push %rcx
+movq $0, %rax
 call scanf
-mov $0, %r8
-mov commainput, %r8
-pop %rsi
+pop %rcx
 pop %rdi
-movb $0, (%rcx)
-cmp $0, %r8
-jg incrementer
 
 jmp crazyfast
 
+end:
+mov $ending, %rdi
+mov $0, %rax
+call printf
 
-incrementer:
-cmp $0, %r8
-je crazyfast
-add $1, (%rcx)
-dec %r8
-jmp incrementer
-
+movq %rbp, %rsp
+popq %rbp
+ret
 

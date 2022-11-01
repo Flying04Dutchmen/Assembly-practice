@@ -27,6 +27,7 @@ brainfuck:
   mov $storage, %rcx
   mov $0, %rsi
   mov (%rdi), %sil
+  mov $1, %r14
   jmp divider
 
 	movq %rbp, %rsp
@@ -39,9 +40,9 @@ movq $0, %rsi
 movb (%rdi), %sil
 jmp divider
 
-divider:
-cmpb $43, %sil
-je plus
+divider:                            #this subroutine checks the current BF
+cmpb $43, %sil                      #with its ascii value to go to the correct 
+je plus                             #subroutine
 
 cmpb $45, %sil
 je minus
@@ -70,27 +71,28 @@ je end
 jmp crazyfast
 
 plus:
-addb $1, (%rcx)
+addb $1, (%rcx)                 #increments current cell
 jmp crazyfast
 
 minus:
-subb $1, (%rcx)
+subb $1, (%rcx)                 #decrements current cell
 jmp crazyfast
 
 cellback:
-sub $1, %rcx
+sub $1, %rcx                  #the name speaks for itself
 jmp crazyfast
 
 cellforward:
-add $1, %rcx
+add $1, %rcx                  #the name speaks for itselft
 jmp crazyfast
 
 printer:
 push %rdi
-mov (%rcx), %rsi
-push %rcx
-mov $output, %rdi
-mov $0, %rax
+mov $0, %rsi
+mov (%rcx), %sil
+push %rcx                               
+mov $output, %rdi           #subroutine for printing the value of the current
+mov $0, %rax                #cell as a character to the terminal
 call printf
 pop %rcx
 pop %rdi
@@ -101,17 +103,16 @@ mov $0, %rsi
 mov (%rcx), %sil
 cmp $0, %rsi
 je skipper
-push %rdi
+push %rdi                         #subroutine for starting subroutines
 mov $0, %rax
 push %rax
 jmp crazyfast
 
 stopsub:
-mov $0, %rsi
-mov (%rcx), %sil
 pop %rax
 pop %r8
-cmp $0, %rsi
+mov (%rcx), %sil                  #subroutine for ending subroutines
+cmp $0, %sil
 je crazyfast
 mov %r8, %rdi
 dec %rdi
@@ -119,7 +120,7 @@ jmp crazyfast
 
 comma:
 push %rdi
-mov $input, %rdi
+mov $input, %rdi                    #subroutine for taking input
 mov %rcx, %rsi
 push %rcx
 movq $0, %rax
@@ -132,17 +133,30 @@ jmp crazyfast
 skipper:
 inc %rdi
 movq $0, %rsi
-movb (%rdi), %sil
-cmp $93, %rsi
-je crazyfast
+movb (%rdi), %sil                   #This subroutine iterates through the
+cmp $93, %rsi                       #instructions when a subroutine doesn't 
+je decounter                        #satisfy the if condition
+cmp $91, %rsi
+je counter
 jmp skipper
 
+counter:
+add $1, %r14                      #counter for opening brackets
+jmp skipper   
+
+decounter:
+dec %r14                  
+cmp $0, %r14                      #counter for closing brackets
+jne skipper
+mov $1, %r14
+jmp crazyfast
+
 end:
-mov $ending, %rdi
-mov $0, %rax
+mov $ending, %rdi                 #Skips a line for neater results
+mov $0, %rax                      
 call printf
 
-movq %rbp, %rsp
+movq %rbp, %rsp                   #statemetns to return to main
 popq %rbp
 ret
 
